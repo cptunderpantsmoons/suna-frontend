@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { isLocalMode } from '@/lib/config';
+import { isBillingDisabled } from '@/lib/config';
 
 interface BillingErrorState {
   message: string;
@@ -19,10 +19,10 @@ export function useBillingError() {
   );
 
   const handleBillingError = useCallback((error: any) => {
-    // In local mode, don't process billing errors
-    if (isLocalMode()) {
+    // When billing is disabled, don't process billing errors
+    if (isBillingDisabled()) {
       console.log(
-        'Running in local development mode - billing checks are disabled',
+        'Billing checks are disabled - ignoring billing error',
       );
       return false;
     }

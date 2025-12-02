@@ -2516,3 +2516,282 @@ export const cancelExecution = async (executionId: string): Promise<void> => {
     throw error;
   }
 };
+
+// ============================================
+// Admin & Cost Tracking API Types and Functions
+// ============================================
+
+// User role type
+export type UserRole = 'user' | 'admin';
+
+// User role record from database
+export interface UserRoleRecord {
+  user_id: string;
+  role: UserRole;
+  created_at: string;
+  updated_at: string;
+}
+
+// Cost record for tracking usage costs
+export interface CostRecord {
+  id: string;
+  user_id: string;
+  thread_id: string;
+  agent_run_id: string;
+  model_name: string;
+  input_tokens: number;
+  output_tokens: number;
+  cost_usd: number;
+  created_at: string;
+}
+
+// Aggregated cost summary for a user
+export interface UserCostSummary {
+  user_id: string;
+  user_email?: string;
+  total_cost_usd: number;
+  total_input_tokens: number;
+  total_output_tokens: number;
+  total_agent_runs: number;
+  period_start: string;
+  period_end: string;
+}
+
+// Response from fetching user costs
+export interface UserCostsResponse {
+  costs: CostRecord[];
+  summary: UserCostSummary;
+}
+
+// Response from fetching all users' costs (admin only)
+export interface AllUsersCostsResponse {
+  users: UserCostSummary[];
+  total_cost_usd: number;
+  period_start: string;
+  period_end: string;
+}
+
+// Admin API Functions
+
+/**
+ * Get costs for the current user
+ */
+export const getUserCosts = async (
+  startDate?: string,
+  endDate?: string
+): Promise<UserCostsResponse> => {
+  try {
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new NoAccessTokenAvailableError();
+    }
+
+    const url = new URL(`${API_URL}/admin/costs/me`);
+    if (startDate) url.searchParams.append('start_date', startDate);
+    if (endDate) url.searchParams.append('end_date', endDate);
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'No error details available');
+      console.error(`Error getting user costs: ${response.status} ${response.statusText}`, errorText);
+      throw new Error(`Error getting user costs: ${response.statusText} (${response.status})`);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof NoAccessTokenAvailableError) {
+      throw error;
+    }
+    console.error('Failed to get user costs:', error);
+    handleApiError(error, { operation: 'load user costs', resource: 'cost data' });
+    throw error;
+  }
+};
+
+/**
+ * Get costs for all users (admin only)
+ */
+export const getAllUsersCosts = async (
+  startDate?: string,
+  endDate?: string
+): Promise<AllUsersCostsResponse> => {
+  try {
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new NoAccessTokenAvailableError();
+    }
+
+    const url = new URL(`${API_URL}/admin/costs/all`);
+    if (startDate) url.searchParams.append('start_date', startDate);
+    if (endDate) url.searchParams.append('end_date', endDate);
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 403) {
+        throw new Error('Admin access required to view all users costs');
+      }
+      const errorText = await response.text().catch(() => 'No error details available');
+      console.error(`Error getting all users costs: ${response.status} ${response.statusText}`, errorText);
+      throw new Error(`Error getting all users costs: ${response.statusText} (${response.status})`);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof NoAccessTokenAvailableError) {
+      throw error;
+    }
+    console.error('Failed to get all users costs:', error);
+    handleApiError(error, { operation: 'load all users costs', resource: 'cost data' });
+    throw error;
+  }
+};
+
+/**
+ * Get costs for a specific user (admin only)
+ */
+export const getUserCostsById = async (
+  userId: string,
+  startDate?: string,
+  endDate?: string
+): Promise<UserCostsResponse> => {
+  try {
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new NoAccessTokenAvailableError();
+    }
+
+    const url = new URL(`${API_URL}/admin/costs/user/${userId}`);
+    if (startDate) url.searchParams.append('start_date', startDate);
+    if (endDate) url.searchParams.append('end_date', endDate);
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 403) {
+        throw new Error('Admin access required to view user costs');
+      }
+      const errorText = await response.text().catch(() => 'No error details available');
+      console.error(`Error getting user costs: ${response.status} ${response.statusText}`, errorText);
+      throw new Error(`Error getting user costs: ${response.statusText} (${response.status})`);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof NoAccessTokenAvailableError) {
+      throw error;
+    }
+    console.error('Failed to get user costs:', error);
+    handleApiError(error, { operation: 'load user costs', resource: 'cost data' });
+    throw error;
+  }
+};
+
+/**
+ * Get user role (admin check)
+ */
+export const getUserRole = async (): Promise<{ role: UserRole }> => {
+  try {
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new NoAccessTokenAvailableError();
+    }
+
+    const response = await fetch(`${API_URL}/admin/role`, {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'No error details available');
+      console.error(`Error getting user role: ${response.status} ${response.statusText}`, errorText);
+      throw new Error(`Error getting user role: ${response.statusText} (${response.status})`);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof NoAccessTokenAvailableError) {
+      throw error;
+    }
+    // Log the error but return default role to allow graceful degradation
+    // This is intentional: if the admin API is not available, users default to 'user' role
+    console.warn('Failed to get user role, defaulting to user:', error);
+    return { role: 'user' as UserRole };
+  }
+};
+
+/**
+ * Set user role (admin only)
+ */
+export const setUserRole = async (
+  userId: string,
+  role: UserRole
+): Promise<UserRoleRecord> => {
+  try {
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new NoAccessTokenAvailableError();
+    }
+
+    const response = await fetch(`${API_URL}/admin/role/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ role }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 403) {
+        throw new Error('Admin access required to set user roles');
+      }
+      const errorText = await response.text().catch(() => 'No error details available');
+      console.error(`Error setting user role: ${response.status} ${response.statusText}`, errorText);
+      throw new Error(`Error setting user role: ${response.statusText} (${response.status})`);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof NoAccessTokenAvailableError) {
+      throw error;
+    }
+    console.error('Failed to set user role:', error);
+    handleApiError(error, { operation: 'set user role', resource: 'user role' });
+    throw error;
+  }
+};

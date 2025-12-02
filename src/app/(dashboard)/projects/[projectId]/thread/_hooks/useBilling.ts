@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { isLocalMode } from '@/lib/config';
+import { isBillingDisabled } from '@/lib/config';
 import { useBillingStatusQuery } from '@/hooks/react-query/threads/use-billing-status';
 import { BillingData, AgentStatus } from '../_types';
 
@@ -23,9 +23,9 @@ export function useBilling(
   const billingStatusQuery = useBillingStatusQuery();
 
   const checkBillingLimits = useCallback(async () => {
-    if (isLocalMode()) {
+    if (isBillingDisabled()) {
       console.log(
-        'Running in local development mode - billing checks are disabled',
+        'Billing checks are disabled - all features available',
       );
       return false;
     }

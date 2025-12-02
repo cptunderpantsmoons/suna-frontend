@@ -28,6 +28,7 @@ interface Config {
   ENV_MODE: EnvMode;
   IS_LOCAL: boolean;
   SUBSCRIPTION_TIERS: SubscriptionTiers;
+  BYPASS_SUBSCRIPTION: boolean;
 }
 
 // Production tier IDs
@@ -134,17 +135,30 @@ const getEnvironmentMode = (): EnvMode => {
 // Get the environment mode once to ensure consistency
 const currentEnvMode = getEnvironmentMode();
 
+// Check if subscription should be bypassed (via environment variable)
+const shouldBypassSubscription = (): boolean => {
+  const bypassEnv = process.env.NEXT_PUBLIC_BYPASS_SUBSCRIPTION?.toLowerCase();
+  return bypassEnv === 'true' || bypassEnv === '1';
+};
+
 // Create the config object
 export const config: Config = {
   ENV_MODE: currentEnvMode,
   IS_LOCAL: currentEnvMode === EnvMode.LOCAL,
   SUBSCRIPTION_TIERS:
     currentEnvMode === EnvMode.STAGING ? STAGING_TIERS : PROD_TIERS,
+  BYPASS_SUBSCRIPTION: shouldBypassSubscription(),
 };
 
 // Helper function to check if we're in local mode (for component conditionals)
 export const isLocalMode = (): boolean => {
   return config.IS_LOCAL;
+};
+
+// Helper function to check if subscription checks should be bypassed
+// When true, all features are available without a paid subscription
+export const isBillingDisabled = (): boolean => {
+  return config.IS_LOCAL || config.BYPASS_SUBSCRIPTION;
 };
 
 // Export subscription tier type for typing elsewhere
