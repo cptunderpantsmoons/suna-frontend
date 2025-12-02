@@ -30,7 +30,6 @@ import {
   DEFAULT_FREE_MODEL_ID,
   DEFAULT_PREMIUM_MODEL_ID,
   formatModelName,
-  getCustomModels,
 } from '@/components/thread/chat-input/_use-model-selection';
 import { CustomModelDialog, CustomModelFormData } from '@/components/thread/chat-input/custom-model-dialog';
 import { PaywallDialog } from '@/components/payment/paywall-dialog';
@@ -46,6 +45,7 @@ export default function ModelSettingsPage() {
     selectedModel,
     setSelectedModel,
     allModels,
+    customModels: hookCustomModels,
     subscriptionStatus,
     canAccessModel,
     refreshCustomModels,
@@ -59,85 +59,28 @@ export default function ModelSettingsPage() {
   const [lockedModel, setLockedModel] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Custom models state
+  // Custom models state - sync with hook's customModels
   const [customModels, setCustomModels] = useState<CustomModel[]>([]);
   const [isCustomModelDialogOpen, setIsCustomModelDialogOpen] = useState(false);
   const [dialogInitialData, setDialogInitialData] = useState<CustomModelFormData>({ id: '', label: '' });
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [editingModelId, setEditingModelId] = useState<string | null>(null);
 
-  // Load custom models from localStorage on component mount
+  // Initialize custom models from hook on mount
   useEffect(() => {
     if (isLocalMode()) {
-      setCustomModels(getCustomModels());
+      setCustomModels(hookCustomModels);
     }
     setIsLoading(false);
-  }, []);
+  }, [hookCustomModels]);
 
-  // Save custom models to localStorage whenever they change
-  useEffect(() => {
-    if (isLocalMode() && customModels.length > 0) {
-      localStorage.setItem(STORAGE_KEY_CUSTOM_MODELS, JSON.stringify(customModels));
-    }
-  }, [customModels]);
-
-  // Enhance model options with custom models
-  const enhancedModelOptions = React.useMemo(() => {
-    const modelMap = new Map();
-
-    // Add all standard models
-    allModels.forEach(model => {
-      modelMap.set(model.id, {
-        ...model,
-        isCustom: false
-      });
-    });
-
-    // Add custom models in local mode
-    if (isLocalMode()) {
-      customModels.forEach(model => {
-        if (!modelMap.has(model.id)) {
-          modelMap.set(model.id, {
-            id: model.id,
-            label: model.label || formatModelName(model.id),
-            requiresSubscription: false,
-            top: false,
-            isCustom: true
-          });
-        }
-      });
-    }
-
-    return Array.from(modelMap.values());
-  }, [allModels, customModels]);
-
-  // Filter models based on search query
-  const filteredOptions = enhancedModelOptions.filter((opt) =>
+  // Filter models based on search query - allModels from hook is already pre-sorted
+  const filteredOptions = allModels.filter((opt) =>
     opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
     opt.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Sort models: recommended paid first, then recommended free, then paid, then free
-  const sortedModels = [...filteredOptions].sort((a, b) => {
-    const aRecommendedPaid = MODELS[a.id]?.recommended && a.requiresSubscription;
-    const bRecommendedPaid = MODELS[b.id]?.recommended && b.requiresSubscription;
-
-    if (aRecommendedPaid && !bRecommendedPaid) return -1;
-    if (!aRecommendedPaid && bRecommendedPaid) return 1;
-
-    const aRecommended = MODELS[a.id]?.recommended;
-    const bRecommended = MODELS[b.id]?.recommended;
-
-    if (aRecommended && !bRecommended) return -1;
-    if (!aRecommended && bRecommended) return 1;
-
-    if (a.requiresSubscription && !b.requiresSubscription) return -1;
-    if (!a.requiresSubscription && b.requiresSubscription) return 1;
-
-    return a.label.localeCompare(b.label);
-  });
-
-  const selectedLabel = enhancedModelOptions.find((o) => o.id === selectedModel)?.label || 'Select model';
+  const selectedLabel = allModels.find((o) => o.id === selectedModel)?.label || 'Select model';
 
   const handleSelect = (id: string) => {
     const isCustomModel = customModels.some(model => model.id === id);
@@ -145,14 +88,14 @@ export default function ModelSettingsPage() {
     if (isCustomModel && isLocalMode()) {
       setSelectedModel(id);
       setIsDropdownOpen(false);
-      toast.success(`Model changed to ${enhancedModelOptions.find(m => m.id === id)?.label || id}`);
+      toast.success(`Model changed to ${allModels.find(m => m.id === id)?.label || id}`);
       return;
     }
 
     if (canAccessModel(id)) {
       setSelectedModel(id);
       setIsDropdownOpen(false);
-      toast.success(`Model changed to ${enhancedModelOptions.find(m => m.id === id)?.label || id}`);
+      toast.success(`Model changed to ${allModels.find(m => m.id === id)?.label || id}`);
     } else {
       setLockedModel(id);
       setPaywallOpen(true);
@@ -438,8 +381,8 @@ export default function ModelSettingsPage() {
                         </TooltipProvider>
                       )}
                     </div>
-                    {sortedModels.map((model, index) => renderModelOption(model, index))}
-                    {sortedModels.length === 0 && (
+                    {filteredOptions.map((model, index) => renderModelOption(model, index))}
+                    {filteredOptions.length === 0 && (
                       <div className="text-sm text-center py-4 text-muted-foreground">
                         No models match your search
                       </div>
@@ -577,7 +520,7 @@ export default function ModelSettingsPage() {
           title="Premium Model"
           description={
             lockedModel
-              ? `Subscribe to access ${enhancedModelOptions.find((m) => m.id === lockedModel)?.label}`
+              ? `Subscribe to access ${allModels.find((m) => m.id === lockedModel)?.label}`
               : 'Subscribe to access premium models with enhanced capabilities'
           }
           ctaText="Subscribe Now"
