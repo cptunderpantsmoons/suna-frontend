@@ -15,7 +15,7 @@ import {
   CreateCheckoutSessionResponse,
 } from '@/lib/api';
 import { toast } from 'sonner';
-import { isLocalMode } from '@/lib/config';
+import { isBillingDisabled } from '@/lib/config';
 
 // Constants
 export const SUBSCRIPTION_PLANS = {
@@ -479,11 +479,11 @@ export function PricingSection({
     }
   };
 
-  if (isLocalMode()) {
+  if (isBillingDisabled()) {
     return (
       <div className="p-4 bg-muted/30 border border-border rounded-lg text-center">
         <p className="text-sm text-muted-foreground">
-          Running in local development mode - billing features are disabled
+          Billing features are disabled - all features are available
         </p>
       </div>
     );

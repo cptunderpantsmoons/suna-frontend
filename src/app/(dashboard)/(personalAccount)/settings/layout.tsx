@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function PersonalAccountSettingsPage({
   children,
@@ -11,10 +12,14 @@ export default function PersonalAccountSettingsPage({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { isAdmin } = useAuth();
+  
   const items = [
     // { name: "Profile", href: "/settings" },
     // { name: "Teams", href: "/settings/teams" },
     { name: 'Billing', href: '/settings/billing' },
+    // Admin link only visible to admin users
+    ...(isAdmin ? [{ name: 'Admin', href: '/settings/admin' }] : []),
   ];
   return (
     <>
