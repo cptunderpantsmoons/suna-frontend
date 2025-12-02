@@ -11,6 +11,10 @@ import {
 } from '@/lib/api';
 import { adminKeys } from './keys';
 
+// Cache duration constants
+const FIVE_MINUTES_MS = 5 * 60 * 1000;
+const TEN_MINUTES_MS = 10 * 60 * 1000;
+
 /**
  * Hook to fetch the current user's costs
  */
@@ -19,7 +23,7 @@ export const useUserCosts = (startDate?: string, endDate?: string) =>
     adminKeys.myCosts(startDate, endDate),
     () => getUserCosts(startDate, endDate),
     {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: FIVE_MINUTES_MS,
       refetchOnWindowFocus: false,
     }
   )();
@@ -33,7 +37,7 @@ export const useAllUsersCosts = (startDate?: string, endDate?: string, enabled =
     () => getAllUsersCosts(startDate, endDate),
     {
       enabled,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: FIVE_MINUTES_MS,
       refetchOnWindowFocus: false,
     }
   )();
@@ -52,7 +56,7 @@ export const useUserCostsById = (
     () => getUserCostsById(userId, startDate, endDate),
     {
       enabled: enabled && !!userId,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: FIVE_MINUTES_MS,
       refetchOnWindowFocus: false,
     }
   )();
@@ -65,7 +69,7 @@ export const useUserRole = () =>
     adminKeys.role(),
     () => getUserRole(),
     {
-      staleTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: TEN_MINUTES_MS,
       refetchOnWindowFocus: false,
     }
   )();

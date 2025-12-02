@@ -31,15 +31,34 @@ import {
 } from 'lucide-react';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
 
+// Configuration constants
+const MAX_COST_RECORDS_DISPLAY = 50;
+const USER_ID_DISPLAY_LENGTH = 8;
+
 interface CostTrackingProps {
   className?: string;
+  /** Maximum number of cost records to display in the detail view */
+  maxRecordsDisplay?: number;
 }
+
+/**
+ * Format a user identifier for display
+ * Shows email if available, otherwise truncated user ID
+ */
+const formatUserIdentifier = (email?: string, userId?: string): string => {
+  if (email) return email;
+  if (userId) return `${userId.slice(0, USER_ID_DISPLAY_LENGTH)}...`;
+  return 'Unknown User';
+};
 
 /**
  * CostTracking component for admin users to view and analyze platform costs.
  * Shows total costs, per-user breakdown, and detailed cost records.
  */
-export function CostTracking({ className }: CostTrackingProps) {
+export function CostTracking({ 
+  className, 
+  maxRecordsDisplay = MAX_COST_RECORDS_DISPLAY 
+}: CostTrackingProps) {
   const [dateRange, setDateRange] = useState<'week' | 'month' | 'all'>('month');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
@@ -232,7 +251,7 @@ export function CostTracking({ className }: CostTrackingProps) {
                     {allUsersCosts.users.map((user) => (
                       <TableRow key={user.user_id}>
                         <TableCell className="font-medium">
-                          {user.user_email || user.user_id.slice(0, 8) + '...'}
+                          {formatUserIdentifier(user.user_email, user.user_id)}
                         </TableCell>
                         <TableCell className="text-right">
                           {formatNumber(user.total_agent_runs)}
@@ -309,7 +328,7 @@ export function CostTracking({ className }: CostTrackingProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {selectedUserCosts.costs.slice(0, 50).map((cost) => (
+                      {selectedUserCosts.costs.slice(0, maxRecordsDisplay).map((cost) => (
                         <TableRow key={cost.id}>
                           <TableCell>
                             {format(new Date(cost.created_at), 'MMM d, HH:mm')}

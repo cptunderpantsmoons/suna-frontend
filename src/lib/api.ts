@@ -2743,8 +2743,10 @@ export const getUserRole = async (): Promise<{ role: UserRole }> => {
     if (error instanceof NoAccessTokenAvailableError) {
       throw error;
     }
-    console.error('Failed to get user role:', error);
-    return { role: 'user' };
+    // Log the error but return default role to allow graceful degradation
+    // This is intentional: if the admin API is not available, users default to 'user' role
+    console.warn('Failed to get user role, defaulting to user:', error);
+    return { role: 'user' as UserRole };
   }
 };
 

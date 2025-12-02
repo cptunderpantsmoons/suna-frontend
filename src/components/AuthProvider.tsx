@@ -36,6 +36,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<UserRole>('user');
 
+// PostgreSQL error code for "no rows returned" from PostgREST
+const POSTGRES_NOT_FOUND_ERROR = 'PGRST116';
+
   // Function to fetch user role from database
   const fetchUserRole = useCallback(async (userId: string): Promise<UserRole> => {
     try {
@@ -47,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) {
         // If no role record exists, user is a regular user
-        if (error.code === 'PGRST116') {
+        if (error.code === POSTGRES_NOT_FOUND_ERROR) {
           return 'user';
         }
         console.error('Error fetching user role:', error);
