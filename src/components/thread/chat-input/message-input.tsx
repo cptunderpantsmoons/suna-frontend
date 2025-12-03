@@ -166,7 +166,7 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
                   <p className='text-sm text-amber-500 hidden sm:block'>Upgrade for full performance</p>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>The free tier is severely limited by inferior models; upgrade to experience the true full Suna experience.</p>
+                  <p>The free tier is severely limited by inferior models; upgrade to experience the true full AtlasAI0 experience.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

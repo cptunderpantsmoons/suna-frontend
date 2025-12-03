@@ -1001,7 +1001,7 @@ export default function MarketplacePage() {
                     <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-foreground">Agents from Kortix Team</h2>
+                    <h2 className="text-lg font-semibold text-foreground">Agents from AtlasAI0 Team</h2>
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
