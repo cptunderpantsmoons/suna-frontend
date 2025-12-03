@@ -13,6 +13,7 @@ import { Clock, Github, X } from 'lucide-react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
+import { siteConfig } from '@/lib/home';
 
 interface MaintenanceAlertProps {
   open: boolean;
@@ -97,7 +98,7 @@ export function MaintenanceAlert({
 
           <AlertDialogFooter className="p-8 pt-4 border-t border-border/40 bg-background/40 backdrop-blur-sm">
             <Link
-              href="https://github.com/AtlasAI0/AtlasAI0"
+              href={siteConfig.links.github}
               target="_blank"
               rel="noopener noreferrer"
               className="mx-auto w-full flex items-center justify-center gap-3 bg-gradient-to-tr from-primary to-primary/80 hover:opacity-90 text-white font-medium rounded-full px-8 py-3 transition-all hover:shadow-md"

@@ -10,6 +10,7 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import Image from 'next/image';
 import Cal, { getCalApi } from '@calcom/embed-react';
 import { useTheme } from 'next-themes';
+import { siteConfig } from '@/lib/home';
 
 export function AtlasProcessModal() {
   const [open, setOpen] = useState(false);
@@ -141,7 +142,7 @@ export function AtlasProcessModal() {
             <div className="h-full overflow-auto">
               <Cal
                 namespace="enterprise-demo"
-                calLink="team/atlasai0/enterprise-demo"
+                calLink={siteConfig.links.calcom}
                 style={{ width: '100%', height: '100%' }}
                 config={{
                   layout: 'month_view',
