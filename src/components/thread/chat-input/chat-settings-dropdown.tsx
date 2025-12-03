@@ -83,7 +83,7 @@ export const ChatSettingsDropdown: React.FC<ChatSettingsDropdownProps> = ({
   const allAgents = [
     {
       id: undefined,
-      name: 'Suna',
+      name: 'AtlasAI0',
       description: 'Your personal AI assistant',
       type: 'default' as const,
       icon: <User className="h-4 w-4" />
@@ -126,7 +126,7 @@ export const ChatSettingsDropdown: React.FC<ChatSettingsDropdownProps> = ({
       };
     }
     return {
-      name: 'Suna',
+      name: 'AtlasAI0',
       icon: <User className="h-4 w-4" />
     };
   };

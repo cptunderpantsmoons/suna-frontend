@@ -1,4 +1,4 @@
-# Suna Frontend
+# AtlasAI0 Frontend
 
 ## Quick Setup
 

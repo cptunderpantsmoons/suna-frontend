@@ -10,8 +10,9 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import Image from 'next/image';
 import Cal, { getCalApi } from '@calcom/embed-react';
 import { useTheme } from 'next-themes';
+import { siteConfig } from '@/lib/home';
 
-export function KortixProcessModal() {
+export function AtlasProcessModal() {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const { resolvedTheme } = useTheme();
@@ -42,9 +43,9 @@ export function KortixProcessModal() {
               <div className="mb-8 mt-0 flex-shrink-0">
                 <Image
                   src={
-                    isDarkMode ? '/kortix-logo-white.svg' : '/kortix-logo.svg'
+                    isDarkMode ? '/atlas-logo-white.svg' : '/atlas-logo.svg'
                   }
-                  alt="Kortix Logo"
+                  alt="AtlasAI0 Logo"
                   width={60}
                   height={21}
                   className="h-6 w-auto"
@@ -141,7 +142,7 @@ export function KortixProcessModal() {
             <div className="h-full overflow-auto">
               <Cal
                 namespace="enterprise-demo"
-                calLink="team/kortix/enterprise-demo"
+                calLink={siteConfig.links.calcom}
                 style={{ width: '100%', height: '100%' }}
                 config={{
                   layout: 'month_view',

@@ -61,6 +61,9 @@ export const siteConfig = {
     discord: 'https://discord.gg/AtlasAI0',
     github: 'https://github.com/AtlasAI0/AtlasAI0',
     instagram: 'https://instagram.com/AtlasAI0',
+    careers: 'https://www.atlasai0.com/careers',
+    calcom: 'team/atlasai0/enterprise-demo',
+    llmPyGithub: 'https://github.com/AtlasAI0/AtlasAI0/blob/main/backend/services/llm.py',
   },
   nav: {
     links: [
